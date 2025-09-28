@@ -1,0 +1,78 @@
+
+import React from 'react';
+import type { GameStatus, Difficulty } from '../types';
+import { PartyPopperIcon, FrownIcon, AlertTriangleIcon, RefreshCwIcon, ArrowRightIcon } from './Icons';
+
+interface GameOverlayProps {
+  status: GameStatus;
+  onRestart: () => void;
+  onNextLevel: () => void;
+  onRetry: () => void;
+  onRestartFromLevel1: () => void;
+  difficulty: Difficulty;
+}
+
+const GameOverlay: React.FC<GameOverlayProps> = ({ status, onRestart, onNextLevel, onRestartFromLevel1, difficulty }) => {
+  
+  const getLostTitle = (diff: Difficulty) => {
+    switch (diff) {
+      case 'Easy': return '초등학교 실패';
+      case 'Medium': return '중학교 실패';
+      case 'Hard': return '고등학교 실패';
+      default: return 'Game Over';
+    }
+  };
+
+  const content = {
+    WON: {
+      icon: <PartyPopperIcon className="w-16 h-16 text-green-500" />,
+      title: 'Level Complete!',
+      message: 'Great job! Ready for the next challenge?',
+      buttons: (
+        <button onClick={onNextLevel} className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-colors">
+          Next Level <ArrowRightIcon className="w-5 h-5" />
+        </button>
+      ),
+    },
+    LOST: {
+      icon: <FrownIcon className="w-16 h-16 text-red-500" />,
+      title: getLostTitle(difficulty),
+      message: "정답을 확인하고 다시 도전해보세요!",
+      buttons: (
+        <button onClick={onRestartFromLevel1} className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors">
+          1레벨부터 다시 시작 <RefreshCwIcon className="w-5 h-5" />
+        </button>
+      ),
+    },
+    ERROR: {
+      icon: <AlertTriangleIcon className="w-16 h-16 text-yellow-500" />,
+      title: 'An Error Occurred',
+      message: 'Could not create a puzzle. Please try again.',
+      buttons: (
+         <button onClick={onRestart} className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors">
+          Try Again <RefreshCwIcon className="w-5 h-5" />
+        </button>
+      ),
+    },
+    PLAYING: null,
+    LOADING: null,
+  };
+
+  const currentContent = content[status];
+  if (!currentContent) return null;
+
+  return (
+    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20 rounded-lg">
+      <div className="text-center p-8 bg-white rounded-xl shadow-lg flex flex-col items-center gap-4 w-4/5">
+        {currentContent.icon}
+        <h2 className="text-2xl font-bold text-slate-800">{currentContent.title}</h2>
+        <p className="text-slate-600">{currentContent.message}</p>
+        <div className="w-full mt-4">
+            {currentContent.buttons}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GameOverlay;
